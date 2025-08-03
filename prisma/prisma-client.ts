@@ -2,6 +2,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate'
+// нужно установить пакет @prisma/extension-accelerate
 
 const globalForPrisma = global as unknown as { 
     prisma: PrismaClient
