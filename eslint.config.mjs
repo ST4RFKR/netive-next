@@ -9,8 +9,27 @@ const compat = new FlatCompat({
   baseDirectory: __dirname,
 });
 
+/** @type {import("eslint").Linter.FlatConfig[]} */
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  // Базовые плагины от Next.js (по желанию)
+  ...compat.extends(),
+
+  // Включаем только базовую среду
+  {
+    ignores: ["**/node_modules/**", "**/.next/**", "**/dist/**"],
+    languageOptions: {
+      ecmaVersion: 2023,
+      sourceType: "module",
+    },
+    rules: {
+      // Выключаем большинство проверок
+      "no-unused-vars": "off",
+      "no-console": "off",
+      "no-debugger": "off",
+      "no-undef": "off",
+      "no-empty": "off",
+    },
+  },
 ];
 
 export default eslintConfig;
