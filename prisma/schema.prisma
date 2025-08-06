@@ -20,7 +20,8 @@ model User {
   cards       NFCCard[]    @relation("UserCards")
   checkpoints Checkpoint[]
   vehicles    Vehicle[]    @relation("DriverVehicles")
-  createdAt   DateTime     @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model NFCCard {
@@ -34,6 +35,8 @@ model NFCCard {
   isActive      Boolean   @default(true)
   issuedAt      DateTime  @default(now())
   deactivatedAt DateTime?
+
+  createdAt DateTime @default(now())
 }
 
 model Vehicle {
@@ -44,7 +47,8 @@ model Vehicle {
   driver      User?        @relation("DriverVehicles", fields: [driverId], references: [id])
   driverId    String?
   checkpoints Checkpoint[]
-  createdAt   DateTime     @default(now())
+
+  createdAt DateTime @default(now())
 }
 
 model Location {
@@ -54,6 +58,8 @@ model Location {
   nfcTagId    String?      @unique
   coordinates String?
   checkpoints Checkpoint[]
+
+  createdAt DateTime @default(now())
 }
 
 model Checkpoint {
@@ -70,6 +76,8 @@ model Checkpoint {
   isVerified Boolean           @default(false)
   gpsCoords  String?
   photos     CheckpointPhoto[]
+
+  createdAt DateTime @default(now())
 }
 
 model CheckpointPhoto {
@@ -77,6 +85,8 @@ model CheckpointPhoto {
   url          String
   checkpoint   Checkpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
   checkpointId String
+
+  createdAt DateTime @default(now())
 }
 
 enum Role {
