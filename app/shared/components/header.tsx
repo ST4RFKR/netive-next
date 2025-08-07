@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { Bell, User, Settings, Menu, Clock } from 'lucide-react'
+import { Bell, User, Settings, Menu, Clock, Nfc, NfcIcon, SmartphoneNfc, SmartphoneNfcIcon } from 'lucide-react'
 import { HeaderSearch } from './header-search'
 
 
@@ -23,11 +23,11 @@ export const Header = () => {
           </Button>
           <div className="flex items-center space-x-3">
             <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
-              <Clock className="h-6 w-6 text-white" />
+              <SmartphoneNfcIcon className="h-6 w-6 text-white" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-xl font-bold text-neutral-900 dark:text-white">
-                TimeTrack Pro
+                NFCWay
               </h1>
             </div>
           </div>

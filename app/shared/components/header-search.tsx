@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 const Api = {
   car: {
-    search: (query: string) => fetch(`/api/vehicle?query=${query}`).then((res) => res.json()),
+    search: (query: string) => fetch(`/api/vehicle/search?query=${query}`).then((res) => res.json()),
   },
   location: {
     search: (query: string) => fetch(`/api/location/search?query=${query}`).then((res) => res.json()),
@@ -22,7 +22,7 @@ export const HeaderSearch = () => {
     return (
       <SearchInput<Vehicle>
         onSearch={(query) => Api.car.search(query)}
-        placeholderExamples={['Ford Focus', 'Toyota', 'Volkswagen']}
+        placeholderExamples={['CC1245DD', 'AB123-34CD', 'AB9876CD', 'AB45657CD']}
         renderItem={(car, onClick) => (
           <Link
             href={`/cars/${car.id}`}

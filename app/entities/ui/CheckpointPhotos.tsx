@@ -14,7 +14,7 @@ export function CheckpointPhotos({ photos }: { photos: CheckpointPhoto[] }) {
               alt="Checkpoint photo"
               className="w-full h-60 object-cover rounded-md border"
               onError={(e: any) => {
-                e.target.src = '/data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=' // твій placeholder
+                e.target.src = '/assets/images/not-found.png'
               }}
             />
           </div>

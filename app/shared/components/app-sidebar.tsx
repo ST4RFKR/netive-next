@@ -17,15 +17,16 @@ const items = [
     icon: Factory,
   },
   {
+    title: "Транспорт",
+    url: "/vehicle",
+    icon: Car,
+  },
+  {
     title: "Облік робочого часу",
     url: "#",
     icon: Timer,
   },
-  {
-    title: "Облік переміщень транспорту",
-    url: "#",
-    icon: Car,
-  },
+
   {
     title: "Search",
     url: "#",

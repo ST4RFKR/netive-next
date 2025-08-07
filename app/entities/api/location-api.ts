@@ -1,4 +1,4 @@
-import { Location } from "@/app/generated/prisma";
+
 import { baseApi } from "@/app/shared/store/api/base-api";
 import { LocationWithCheckpoints } from "../model/location";
 

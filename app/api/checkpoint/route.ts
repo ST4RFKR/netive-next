@@ -7,6 +7,7 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const locationId = searchParams.get('locationId');
     const limit = parseInt(searchParams.get('limit') || '50');
+    const page = parseInt(searchParams.get('page') || '1');
 
     const where = locationId ? { locationId } : undefined;
 
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
       orderBy: { timestamp: 'desc' },
       take: limit,
       include: { user: true, vehicle: true, location: true },
+      skip: (page - 1) * limit
     });
 
     return NextResponse.json(checkpoints);

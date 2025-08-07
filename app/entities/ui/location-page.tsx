@@ -1,14 +1,8 @@
 'use client'
-import { useGetLocationsQuery } from '@/app/features/location/api/location-api'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/app/shared/components/ui/card'
 import { MapPin, Tag, Globe, Loader2 } from 'lucide-react'
 import { useGetLocationQuery } from '../api/location-api'
 import { CheckpointsTable } from './checkpoints-table'
-
-
-
-
-
 
 interface LocationPageClientProps {
   locationId: string

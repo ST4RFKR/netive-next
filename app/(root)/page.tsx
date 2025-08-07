@@ -1,55 +1,55 @@
-
-import { Clock, Car, Inbox, User, Factory, ArrowRight, ArrowLeft } from 'lucide-react'
-import { Avatar, AvatarFallback } from "../shared/components/ui/avatar"
-import { AvatarImage } from "@radix-ui/react-avatar"
+'use client'
+import React, { useState, useEffect } from 'react'
+import { Clock, Car, Inbox, User, Factory, ArrowRight, ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../shared/components/ui/card'
+import { Avatar, AvatarFallback, AvatarImage } from '../shared/components/ui/avatar'
+import { Button } from '../shared/components/ui/button' // Исправлен импорт
+import { useGetCheckpointsQuery } from '../features/dashboard/api/checkpoint-api'
+import { useGetVehiclesByDateQuery } from '../features/dashboard/api/vehicles-on-objects-api'
+
+interface User {
+  id: string
+  name: string
+  avatar?: string
+}
+
+interface Vehicle {
+  id: string
+  plate: string
+  model: string
+}
+
+interface Location {
+  id: string
+  name: string
+}
+
+interface Checkpoint {
+  id: string
+  type: 'ENTER' | 'EXIT'
+  userId?: string
+  vehicleId?: string
+  locationId: string
+  timestamp: string
+  comment?: string
+  user?: User
+  vehicle?: Vehicle
+  location: Location
+}
 
 export default function DashboardPage() {
-  // Simulated data for latest events and vehicles on objects
-  const latestEvents = [
-    {
-      id: '1',
-      type: 'ENTER',
-      user: { name: 'Іван Петренко', avatar: '/placeholder-user.png' },
-      vehicle: null,
-      location: 'Головний офіс',
-      timestamp: '2025-08-06T10:30:00Z',
-      comment: null,
-    },
-    {
-      id: '2',
-      type: 'EXIT',
-      user: null,
-      vehicle: { plate: 'АА1234КК', model: 'Ford Transit' },
-      location: 'Склад №1',
-      timestamp: '2025-08-06T10:15:00Z',
-      comment: 'Доставка вантажу А',
-    },
-    {
-      id: '3',
-      type: 'ENTER',
-      user: { name: 'Олена Коваль', avatar: '/placeholder-user.png' },
-      vehicle: null,
-      location: 'Виробничий цех',
-      timestamp: '2025-08-06T09:45:00Z',
-      comment: null,
-    },
-    {
-      id: '4',
-      type: 'ENTER',
-      user: null,
-      vehicle: { plate: 'ВВ5678ЛЛ', model: 'MAN TGL' },
-      location: 'Головний офіс',
-      timestamp: '2025-08-06T09:30:00Z',
-      comment: 'Забір документів',
-    },
-  ]
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
 
-  const vehiclesOnObjects = [
-    { location: 'Головний офіс', vehicles: [{ plate: 'АА1234КК', model: 'Ford Transit' }, { plate: 'ВВ5678ЛЛ', model: 'MAN TGL' }] },
-    { location: 'Склад №1', vehicles: [{ plate: 'СС9012ММ', model: 'Mercedes Sprinter' }] },
-    { location: 'Виробничий цех', vehicles: [] },
-  ]
+  // Используем RTK Query для получения данных
+  const { data: checkpointsData, isLoading, error } = useGetCheckpointsQuery({
+    page: currentPage,
+    limit: itemsPerPage
+  })
+  const date = new Date().toISOString().slice(0, 10)
+  const { data: vehiclesOnObjectsData, isLoading: isLoadingVehicles } = useGetVehiclesByDateQuery(date)
+  const totalVehicles = vehiclesOnObjectsData?.reduce((total, vehicles) => total + vehicles.vehicles.length, 0)
+
 
   const formatTimeAgo = (isoString: string) => {
     const date = new Date(isoString);
@@ -63,6 +63,23 @@ export default function DashboardPage() {
     if (diffHours < 24) return `${diffHours} год тому`;
     return date.toLocaleDateString('uk-UA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
   }
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
+
+  const handleNextPage = () => {
+    if (checkpointsData && checkpointsData.length === itemsPerPage) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  // Проверяем, есть ли данные для отображения
+  const checkpoints = checkpointsData || []
+  const hasMore = checkpointsData && checkpointsData.length === itemsPerPage
+  const hasPrev = currentPage > 1
 
   return (
     <div className="flex h-screen bg-neutral-100 dark:bg-neutral-900">
@@ -89,68 +106,99 @@ export default function DashboardPage() {
               <Car className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">8</div>
+              <div className="text-2xl font-bold">{totalVehicles}</div>
               <p className="text-xs text-muted-foreground">
                 +1 за останній тиждень
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Сьогоднішні перевірки</CardTitle>
-              <Inbox className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">124</div>
-              <p className="text-xs text-muted-foreground">
-                +15% порівняно з вчора
               </p>
             </CardContent>
           </Card>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          {/* Latest Events */}
+          {/* Latest Events with Pagination */}
           <Card>
             <CardHeader>
               <CardTitle>Останні події</CardTitle>
               <CardDescription>Останні в'їзди та виїзди персоналу та транспорту.</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {latestEvents.map((event) => (
-                  <div key={event.id} className="flex items-center gap-4">
-                    {event.type === 'ENTER' ? (
-                      <ArrowRight className="h-5 w-5 text-green-500" />
-                    ) : (
-                      <ArrowLeft className="h-5 w-5 text-red-500" />
-                    )}
-                    {event.user ? (
-                      <Avatar className="h-9 w-9">
-                        <AvatarImage src={event.user.avatar || "/placeholder.svg"} alt={`@${event.user.name}`} />
-                        <AvatarFallback>{event.user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <Car className="h-9 w-9 text-muted-foreground" />
-                    )}
-                    <div className="grid gap-1">
-                      <p className="text-sm font-medium leading-none">
-                        {event.user ? event.user.name : event.vehicle?.plate}
-                        {' '}
-                        <span className="text-muted-foreground">
-                          {event.type === 'ENTER' ? 'увійшов' : 'виїхав'} з
-                        </span>
-                        {' '}
-                        {event.location}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatTimeAgo(event.timestamp)}
-                        {event.comment && ` - ${event.comment}`}
-                      </p>
-                    </div>
+              <div className="space-y-4 min-h-[300px]">
+                {isLoading ? (
+                  <div className="flex items-center justify-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                   </div>
-                ))}
+                ) : error ? (
+                  <div className="flex items-center justify-center h-32">
+                    <p className="text-red-500">Помилка при завантаженні даних</p>
+                  </div>
+                ) : checkpoints.length === 0 ? (
+                  <div className="flex items-center justify-center h-32">
+                    <p className="text-muted-foreground">Немає подій для відображення</p>
+                  </div>
+                ) : (
+                  checkpoints.map((event: Checkpoint) => (
+                    <div key={event.id} className="flex items-center gap-4">
+                      {event.type === 'ENTER' ? (
+                        <ArrowRight className="h-5 w-5 text-green-500" />
+                      ) : (
+                        <ArrowLeft className="h-5 w-5 text-red-500" />
+                      )}
+                      {event.user ? (
+                        <Avatar className="h-9 w-9">
+                          <AvatarImage src={event.user.avatar || "/placeholder-user.jpg"} alt={`@${event.user.name}`} />
+                          <AvatarFallback>{event.user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <Car className="h-9 w-9 text-muted-foreground" />
+                      )}
+                      <div className="grid gap-1">
+                        <p className="text-sm font-medium leading-none">
+                          {event.user ? event.user.name : event.vehicle?.plate}
+                          {' '}
+                          <span className="text-muted-foreground">
+                            {event.type === 'ENTER' ? 'увійшов до' : 'виїхав з'}
+                          </span>
+                          {' '}
+                          {event.location.name}
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          {formatTimeAgo(event.timestamp)}
+                          {event.comment && ` - ${event.comment}`}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
+
+              {/* Pagination Controls */}
+              {!isLoading && !error && (
+                <div className="flex items-center justify-between pt-4">
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    Сторінка {currentPage}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handlePrevPage}
+                      disabled={!hasPrev || isLoading}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Попередня
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleNextPage}
+                      disabled={!hasMore || isLoading}
+                    >
+                      Наступна
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -162,8 +210,8 @@ export default function DashboardPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {vehiclesOnObjects.map((obj) => (
-                  <div key={obj.location} className="grid gap-2">
+                {vehiclesOnObjectsData?.map((obj) => (
+                  <div key={obj.location}>
                     <h4 className="font-semibold flex items-center gap-2">
                       <Factory className="h-4 w-4 text-muted-foreground" />
                       {obj.location}
@@ -171,11 +219,15 @@ export default function DashboardPage() {
                     {obj.vehicles.length > 0 ? (
                       <ul className="list-disc pl-6 text-sm text-muted-foreground">
                         {obj.vehicles.map((vehicle) => (
-                          <li key={vehicle.plate}>{vehicle.plate} ({vehicle.model})</li>
+                          <li key={vehicle.plate}>
+                            {vehicle.plate} ({vehicle.model})
+                          </li>
                         ))}
                       </ul>
                     ) : (
-                      <p className="text-sm text-muted-foreground pl-6">Немає техніки на цьому об'єкті.</p>
+                      <p className="text-sm text-muted-foreground pl-6">
+                        Немає техніки на цьому об'єкті.
+                      </p>
                     )}
                   </div>
                 ))}

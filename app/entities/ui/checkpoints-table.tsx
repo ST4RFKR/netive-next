@@ -30,13 +30,15 @@ type CheckpointsTableProps = {
 export function CheckpointsTable({ checkpoints }: CheckpointsTableProps) {
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<CheckpointWithPhotos | null>(null)
   const [selectedDate, setSelectedDate] = useState('all')
+  console.log('checkpoints', checkpoints);
+
 
   // Group checkpoints by date
   const checkpointsByDate = useMemo<Record<string, CheckpointWithPhotos[]>>(() => {
     const grouped: Record<string, CheckpointWithPhotos[]> = {}
 
     checkpoints.forEach((checkpoint) => {
-      const date = new Date(checkpoint.createdAt).toDateString()
+      const date = new Date(checkpoint.timestamp).toISOString().slice(0, 10)
       if (!grouped[date]) {
         grouped[date] = []
       }
@@ -61,6 +63,8 @@ export function CheckpointsTable({ checkpoints }: CheckpointsTableProps) {
       minute: '2-digit',
     })
   }
+  console.log('selectedDate:', selectedDate)
+  console.log('checkpointsByDate keys:', Object.keys(checkpointsByDate))
 
   return (
     <div className="space-y-6">
@@ -100,7 +104,7 @@ export function CheckpointsTable({ checkpoints }: CheckpointsTableProps) {
               <TableRow>
                 <TableHead>Дата/Час</TableHead>
                 <TableHead>Тип</TableHead>
-                <TableHead>Користувач</TableHead>
+                <TableHead>Працівник</TableHead>
                 <TableHead>Транспорт</TableHead>
                 <TableHead>Статус</TableHead>
                 <TableHead>Дії</TableHead>
